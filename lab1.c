@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#define STATUS_FILE "status.txt"
+#define OBRADA_FILE "obrada.txt"
 
 void obradi_sigusr1(int sig);
 void obradi_sigterm(int sig);
@@ -32,13 +34,13 @@ int main(void) {
     act.sa_flags = 0;
     sigaction(SIGINT, &act, NULL);
 
-    FILE *status = fopen("status.txt", "r");
-    FILE *obrada = fopen("obrada.txt", "a+");
+    FILE *status = fopen(STATUS_FILE, "r");
+    FILE *obrada = fopen(OBRADA_FILE, "a+");
 
     printf("Loading broj...\n");
     if (fscanf(status, "%d", &broj) == 0) return 1;
     if (broj == 0) {
-        printf("Loading broj from obrada.txt...\n");
+        printf("Loading broj from %s...\n", OBRADA_FILE);
         while(fscanf(obrada, "%d", &broj) == 1)
             ;
         broj = sqrt(broj);
@@ -46,7 +48,7 @@ int main(void) {
     printf("broj: %d loaded successfully\n", broj++);
     fclose(status);
 
-    status = fopen("status.txt", "w");
+    status = fopen(STATUS_FILE, "w");
     fprintf(status, "0");
     fclose(status);
 
@@ -68,8 +70,8 @@ void obradi_sigusr1(int sig) {
 }
 
 void obradi_sigterm(int sig) {
-    printf("Saving broj: %d to status.txt...\n", broj);
-    FILE *status = fopen("status.txt", "w");
+    printf("Saving broj: %d to %s...\n", broj, STATUS_FILE);
+    FILE *status = fopen(STATUS_FILE, "w");
     fprintf(status, "%d", broj);
     printf("Process terminated!\n");
     exit(1);
